@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import User, Payment
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
@@ -20,3 +20,5 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('email', 'password1', 'password2')}
         ),
     )
+
+admin.site.register(Payment)
