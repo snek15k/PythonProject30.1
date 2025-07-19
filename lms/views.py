@@ -4,7 +4,7 @@ from .serializers import CourseSerializer
 from rest_framework import generics
 from .models import Lesson
 from .serializers import LessonSerializer
-from .permissions import IsModeratorOrReadOnlyEdit, IsOwnerOrModerator
+from .permissions import IsModeratorOrReadOnlyEdit, IsOwner
 from users.permissions import IsModerator, IsOwnerOrModerator
 from rest_framework.permissions import IsAuthenticated
 
@@ -14,13 +14,12 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['create', 'destroy']:
+            self.permission_classes = [IsAuthenticated, IsOwner]
+        elif self.action in ['update', 'partial_update', 'retrieve', 'list']:
+            self.permission_classes = [IsAuthenticated, IsOwner | IsModerator]
+        else:
             self.permission_classes = [IsAuthenticated]
-        elif self.action in ['update', 'partial_update']:
-            self.permission_classes = [IsAuthenticated, IsModerator | IsOwnerOrModerator]
-        elif self.action in ['create', 'destroy']:
-            # Только владельцы, не модераторы
-            self.permission_classes = [IsAuthenticated, IsOwnerOrModerator]
         return [permission() for permission in self.permission_classes]
 
 
@@ -48,10 +47,9 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == 'POST':
-            # Только владельцы, не модераторы
-            self.permission_classes = [IsAuthenticated, IsOwnerOrModerator]
+            self.permission_classes = [IsAuthenticated, IsOwner]
         else:
-            self.permission_classes = [IsAuthenticated]
+            self.permission_classes = [IsAuthenticated, IsOwner | IsModerator]
         return [permission() for permission in self.permission_classes]
 
 
@@ -60,10 +58,10 @@ class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LessonSerializer
 
     def get_permissions(self):
-        if self.request.method in ['PUT', 'PATCH']:
-            self.permission_classes = [IsAuthenticated, IsModerator | IsOwnerOrModerator]
+        if self.request.method in ['PUT', 'PATCH', 'GET']:
+            self.permission_classes = [IsAuthenticated, IsOwner | IsModerator]
         elif self.request.method == 'DELETE':
-            self.permission_classes = [IsAuthenticated, IsOwnerOrModerator]
+            self.permission_classes = [IsAuthenticated, IsOwner]
         else:
             self.permission_classes = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]

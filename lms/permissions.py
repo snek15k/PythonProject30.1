@@ -17,16 +17,9 @@ class IsModeratorOrReadOnlyEdit(BasePermission):
         return self.has_permission(request, view)
 
 
-class IsOwnerOrModerator(BasePermission):
+class IsOwner(BasePermission):
     """
-    Модераторы имеют доступ ко всем объектам.
-    Обычные пользователи — только к своим.
+    Доступ только владельцу объекта.
     """
-
     def has_object_permission(self, request, view, obj):
-        is_moderator = request.user.groups.filter(name='Модераторы').exists()
-
-        if request.method in SAFE_METHODS or request.method in ['PUT', 'PATCH', 'DELETE']:
-            return is_moderator or obj.owner == request.user
-
-        return False  # POST не разрешён, его контролирует другой
+        return obj.owner == request.user
