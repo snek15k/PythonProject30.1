@@ -11,6 +11,8 @@ from .paginators import StandardResultsSetPagination
 from .permissions import IsModeratorOrReadOnlyEdit, IsOwner
 from .serializers import CourseSerializer, LessonSerializer
 
+from rest_framework.exceptions import PermissionDenied
+
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
@@ -48,6 +50,9 @@ class LessonListCreateAPIView(generics.ListCreateAPIView):
         return Lesson.objects.filter(owner=user)
 
     def perform_create(self, serializer):
+        course = serializer.validated_data['course']
+        if course.owner != self.request.user:
+            raise PermissionDenied('Вы не владелец курса.')
         serializer.save(owner=self.request.user)
 
     def get_permissions(self):
