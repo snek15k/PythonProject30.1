@@ -1,12 +1,16 @@
-from rest_framework import viewsets
-from .models import Course
-from .serializers import CourseSerializer
-from rest_framework import generics
-from .models import Lesson
-from .serializers import LessonSerializer
-from .permissions import IsModeratorOrReadOnlyEdit, IsOwner
-from users.permissions import IsModerator, IsOwnerOrModerator
+from rest_framework import generics, viewsets
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from users.permissions import IsModerator, IsOwnerOrModerator
+
+from .models import Course, Lesson, Subscription
+from .paginators import StandardResultsSetPagination
+from .permissions import IsModeratorOrReadOnlyEdit, IsOwner
+from .serializers import CourseSerializer, LessonSerializer
+
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
@@ -35,6 +39,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 class LessonListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = LessonSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         user = self.request.user
@@ -65,3 +70,38 @@ class LessonRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
         else:
             self.permission_classes = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]
+
+
+class CourseSubscriptionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        course_id = request.data.get('course_id')
+
+        if not course_id:
+            return Response({"error": "course_id обязателен"}, status=400)
+
+        course = get_object_or_404(Course, id=course_id)
+
+        subscription = Subscription.objects.filter(user=user, course=course)
+
+        if subscription.exists():
+            subscription.delete()
+            message = "Подписка удалена"
+        else:
+            Subscription.objects.create(user=user, course=course)
+            message = "Подписка добавлена"
+
+        return Response({"message": message})
+
+
+class CourseListAPIView(generics.ListAPIView):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context

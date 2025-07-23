@@ -1,9 +1,10 @@
-from rest_framework import generics, filters, permissions, viewsets
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Payment
-from .serializers import PaymentSerializer
-from .models import User
-from .serializers import UserSerializer, UserRegistrationSerializer
+from rest_framework import filters, generics, permissions, viewsets
+
+from .models import Payment, User
+from .serializers import (PaymentSerializer, UserRegistrationSerializer,
+                          UserSerializer)
+
 
 class PaymentListAPIView(generics.ListAPIView):
     queryset = Payment.objects.all()

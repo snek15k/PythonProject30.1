@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import PaymentListAPIView
 from rest_framework.routers import DefaultRouter
-from .views import RegisterView, UserViewSet
+
+from .views import PaymentListAPIView, RegisterView, UserViewSet
 
 router = DefaultRouter()
 router.register('all', UserViewSet, basename='user')  # CRUD

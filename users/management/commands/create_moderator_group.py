@@ -1,7 +1,9 @@
-from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.core.management.base import BaseCommand
+
 from lms.models import Course, Lesson
+
 
 class Command(BaseCommand):
     help = 'Создаёт группу модераторов с нужными правами'
