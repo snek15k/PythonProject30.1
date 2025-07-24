@@ -114,7 +114,7 @@ class SubscriptionTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         data = {'course_id': self.course.id}
         # Если отписка у тебя реализована через DELETE, то лучше так:
-        response = self.client.delete(self.subscribe_url, data)
+        response = self.client.post(self.subscribe_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get('message'), 'Подписка удалена')
         self.assertFalse(Subscription.objects.filter(user=self.user, course=self.course).exists())
