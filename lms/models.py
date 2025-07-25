@@ -6,8 +6,11 @@ class Course(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название')
     preview = models.ImageField(upload_to='courses/previews/', null=True, blank=True, verbose_name='Превью')
     description = models.TextField(verbose_name='Описание')
+    price = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Цена')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='courses',
                               verbose_name='Владелец')
+    stripe_product_id = models.CharField(max_length=255, blank=True, null=True)
+    stripe_price_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.title

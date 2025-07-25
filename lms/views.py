@@ -10,6 +10,7 @@ from .models import Course, Lesson, Subscription
 from .paginators import StandardResultsSetPagination
 from .permissions import IsModeratorOrReadOnlyEdit, IsOwner
 from .serializers import CourseSerializer, LessonSerializer
+from .services.stripe_api import create_stripe_product, create_stripe_price, create_checkout_session
 
 from rest_framework.exceptions import PermissionDenied
 
@@ -110,3 +111,28 @@ class CourseListAPIView(generics.ListAPIView):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+
+class BuyCourseView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+
+        if not course.stripe_product_id:
+            product = create_stripe_product(course.title)
+            course.stripe_product_id = product.id
+
+        if not course.stripe_price_id:
+            price = create_stripe_price(course.stripe_product_id, int(course.price * 100))  # цену в копейках
+            course.stripe_price_id = price.id
+
+        course.save()
+
+        session = create_checkout_session(
+            course.stripe_price_id,
+            success_url='https://example.com/success/',
+            cancel_url='https://example.com/cancel/',
+        )
+
+        return Response({'checkout_url': session.url})
