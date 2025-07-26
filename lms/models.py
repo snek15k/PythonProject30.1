@@ -37,3 +37,37 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"{self.user} → {self.course}"
+
+
+class Payment(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='payments',
+        verbose_name='Пользователь'
+    )
+    course = models.ForeignKey(
+        'Course',
+        on_delete=models.CASCADE,
+        related_name='payments',
+        verbose_name='Курс'
+    )
+    amount = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        verbose_name='Сумма'
+    )
+    stripe_session_id = models.CharField(
+        max_length=255,
+        verbose_name='ID сессии Stripe'
+    )
+    payment_url = models.URLField(
+        verbose_name='Ссылка на оплату'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+
+    def __str__(self):
+        return f"{self.user} → {self.course} ({self.amount}₽)"

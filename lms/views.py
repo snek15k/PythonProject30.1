@@ -3,6 +3,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from .models import Payment
 
 from users.permissions import IsModerator, IsOwnerOrModerator
 
@@ -133,6 +134,15 @@ class BuyCourseView(APIView):
             course.stripe_price_id,
             success_url='https://example.com/success/',
             cancel_url='https://example.com/cancel/',
+        )
+
+        # Создание объекта Payment
+        Payment.objects.create(
+            user=request.user,
+            course=course,
+            amount=course.price,
+            stripe_session_id=session.id,
+            payment_url=session.url
         )
 
         return Response({'checkout_url': session.url})
