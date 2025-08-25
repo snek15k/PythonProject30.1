@@ -1,11 +1,12 @@
-```dockerfile
 # Используем официальный Python-образ
 FROM python:3.11-slim
 
-# Устанавливаем зависимости для работы с PostgreSQL
+# Устанавливаем зависимости для работы с PostgreSQL и Pillow
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    libjpeg-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Рабочая директория
@@ -20,5 +21,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копируем весь проект
 COPY . .
 
-# Команда запуска (миграции + сервер)
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+# Собираем статику
+RUN python manage.py collectstatic --noinput
+
+# Запускаем через Gunicorn
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
