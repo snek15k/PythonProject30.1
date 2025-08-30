@@ -20,7 +20,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U postgres -d postgres"
+          --health-cmd="pg_isready -U postgres"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -40,10 +40,10 @@ jobs:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: ${{ job.services.redis.ports[6379] }}
       REDIS_DB: 0
 
     steps:
@@ -58,23 +58,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          sudo apt-get update && sudo apt-get install -y redis-tools postgresql-client
 
-      - name: Wait for Postgres
+      - name: Wait for services
         run: |
-          for i in {1..30}; do
-            pg_isready -h postgres -U postgres -d postgres -p 5432 && break
-            echo "Postgres is unavailable - sleeping"
-            sleep 2
-          done
-
-      - name: Wait for Redis
-        run: |
-          for i in {1..30}; do
-            redis-cli -h redis ping && break
-            echo "Redis is unavailable - sleeping"
-            sleep 2
-          done
+          until pg_isready -h 127.0.0.1 -U postgres; do sleep 1; done
+          until redis-cli -h 127.0.0.1 -p $REDIS_PORT ping; do sleep 1; done
 
       - name: Run migrations
         run: python manage.py migrate
