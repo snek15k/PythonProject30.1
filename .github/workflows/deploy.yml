@@ -26,6 +26,8 @@ jobs:
 
     env:
       DATABASE_URL: postgres://test_user:test_pass@localhost:5432/test_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
 
     steps:
       - name: Checkout code
