@@ -40,10 +40,10 @@ jobs:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_HOST: 127.0.0.1
-      POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
-      REDIS_HOST: 127.0.0.1
-      REDIS_PORT: ${{ job.services.redis.ports[6379] }}
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
       REDIS_DB: 0
 
     steps:
@@ -59,10 +59,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Wait for services
+      - name: Wait for PostgreSQL
         run: |
-          until pg_isready -h 127.0.0.1 -U postgres; do sleep 1; done
-          until redis-cli -h 127.0.0.1 -p $REDIS_PORT ping; do sleep 1; done
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for PostgreSQL..."
+            sleep 1
+          done
+
+      - name: Wait for Redis
+        run: |
+          until redis-cli -h localhost -p 6379 ping | grep -q "PONG"; do
+            echo "Waiting for Redis..."
+            sleep 1
+          done
 
       - name: Run migrations
         run: python manage.py migrate
