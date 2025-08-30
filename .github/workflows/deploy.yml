@@ -25,6 +25,7 @@ jobs:
           --health-retries=5
 
     env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
       DATABASE_URL: postgres://test_user:test_pass@localhost:5432/test_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
