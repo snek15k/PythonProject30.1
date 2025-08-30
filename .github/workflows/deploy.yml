@@ -40,7 +40,7 @@ jobs:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_HOST: localhost
+      POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       REDIS_HOST: localhost
       REDIS_PORT: 6379
@@ -59,13 +59,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-
       - name: Install redis-tools
         run: sudo apt-get update && sudo apt-get install -y redis-tools
 
       - name: Wait for services
         run: |
-          until pg_isready -h localhost -U postgres; do sleep 1; done
+          until pg_isready -h postgres -U postgres; do sleep 1; done
           until redis-cli -h localhost ping; do sleep 1; done
 
       - name: Run migrations
