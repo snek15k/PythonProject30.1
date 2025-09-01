@@ -37,11 +37,11 @@ jobs:
 
     env:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_HOST: localhost
-      POSTGRES_PORT: 5432
+      DATABASE_NAME: base_one
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: 12345
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
       REDIS_HOST: localhost
       REDIS_PORT: 6379
       REDIS_DB: 0
