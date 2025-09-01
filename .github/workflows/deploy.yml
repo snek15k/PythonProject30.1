@@ -13,15 +13,15 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
-          POSTGRES_USER: ${{ secrets.DATABASE_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U ${{ secrets.DATABASE_USER }}" 
-          --health-interval 10s 
-          --health-timeout 5s 
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
           --health-retries 5
 
       redis:
@@ -29,9 +29,9 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-          --health-cmd "redis-cli ping" 
-          --health-interval 10s 
-          --health-timeout 5s 
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
           --health-retries 5
 
     steps:
@@ -50,7 +50,7 @@ jobs:
 
       - name: Wait for Postgres
         run: |
-          until pg_isready -h localhost -p 5432 -U ${{ secrets.DATABASE_USER }}; do
+          until pg_isready -h localhost -p 5432 -U postgres; do
             echo "Waiting for Postgres..."
             sleep 3
           done
