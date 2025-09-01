@@ -14,7 +14,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: base_one
+          POSTGRES_DB: postgres
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
@@ -37,11 +37,11 @@ jobs:
 
     env:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      DATABASE_NAME: base_one
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
-      DATABASE_HOST: localhost
-      DATABASE_PORT: 5432
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
       REDIS_HOST: localhost
       REDIS_PORT: 6379
       REDIS_DB: 0
@@ -68,7 +68,7 @@ jobs:
 
       - name: Wait for Redis
         run: |
-          until redis-cli -h localhost -p 6379 ping | grep -q "PONG"; do
+          until nc -z localhost 6379; do
             echo "Waiting for Redis..."
             sleep 1
           done
