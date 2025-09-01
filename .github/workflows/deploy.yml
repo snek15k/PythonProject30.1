@@ -14,26 +14,26 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_DB: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+          POSTGRES_USER: ${{ secrets.DATABASE_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U postgres"
+          --health-cmd="pg_isready -U ${{ secrets.DATABASE_USER }} -d ${{ secrets.DATABASE_NAME }}"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
 
       redis:
-        image: redis:6
+        image: redis:7
         ports:
           - 6379:6379
         options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-cmd "redis-cli ping || exit 1"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v3
@@ -50,26 +50,34 @@ jobs:
 
       - name: Run migrations
         env:
-          DATABASE_NAME: postgres
-          DATABASE_USER: postgres
-          DATABASE_PASSWORD: postgres
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           DATABASE_HOST: localhost
           DATABASE_PORT: 5432
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DEBUG: ${{ secrets.DEBUG }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_API_VERSION: ${{ secrets.STRIPE_API_VERSION }}
           REDIS_HOST: localhost
           REDIS_PORT: 6379
-          REDIS_DB: 0
+          REDIS_DB: ${{ secrets.REDIS_DB }}
         run: |
           python manage.py migrate
 
       - name: Run tests
         env:
-          DATABASE_NAME: postgres
-          DATABASE_USER: postgres
-          DATABASE_PASSWORD: postgres
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           DATABASE_HOST: localhost
           DATABASE_PORT: 5432
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DEBUG: ${{ secrets.DEBUG }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_API_VERSION: ${{ secrets.STRIPE_API_VERSION }}
           REDIS_HOST: localhost
           REDIS_PORT: 6379
-          REDIS_DB: 0
+          REDIS_DB: ${{ secrets.REDIS_DB }}
         run: |
           python manage.py test
