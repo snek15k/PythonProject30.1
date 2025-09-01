@@ -48,16 +48,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Wait for DB and Redis
+    - name: Wait for DB
       run: |
-        until pg_isready -h localhost -p 5432 -U postgres; do
-          echo "Waiting for Postgres..."
-          sleep 2
-        done
-        until redis-cli -h localhost ping; do
-          echo "Waiting for Redis..."
-          sleep 2
-        done
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
 
     - name: Run migrations
       env:
