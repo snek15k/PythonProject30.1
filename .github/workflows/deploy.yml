@@ -1,26 +1,26 @@
-name: Django CI
+name: Django CI/CD
 
 on:
   push:
-    branches:
-      - feature/**
+    branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
-        image: postgres:15
+      db:
+        image: postgres:14
         env:
-          POSTGRES_DB: postgres
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: 12345
+          POSTGRES_DB: base_one
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U postgres"
+          --health-cmd="pg_isready -U postgres -d base_one"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -30,51 +30,53 @@ jobs:
         ports:
           - 6379:6379
         options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      DATABASE_NAME: base_one
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: 12345
-      DATABASE_HOST: localhost
-      DATABASE_PORT: 5432
-      REDIS_HOST: localhost
-      REDIS_PORT: 6379
-      REDIS_DB: 0
+          --health-cmd="redis-cli ping || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Wait for PostgreSQL
-        run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
-            echo "Waiting for PostgreSQL..."
-            sleep 1
-          done
+    - name: Wait for DB and Redis
+      run: |
+        until pg_isready -h localhost -p 5432 -U postgres; do
+          echo "Waiting for Postgres..."
+          sleep 2
+        done
+        until redis-cli -h localhost ping; do
+          echo "Waiting for Redis..."
+          sleep 2
+        done
 
-      - name: Wait for Redis
-        run: |
-          until nc -z localhost 6379; do
-            echo "Waiting for Redis..."
-            sleep 1
-          done
+    - name: Run migrations
+      env:
+        DATABASE_NAME: base_one
+        DATABASE_USER: postgres
+        DATABASE_PASSWORD: 12345
+        DATABASE_HOST: localhost
+        DATABASE_PORT: 5432
+      run: |
+        python manage.py migrate
 
-      - name: Run migrations
-        run: python manage.py migrate
-
-      - name: Run tests
-        run: python manage.py test
+    - name: Run tests
+      env:
+        DATABASE_NAME: base_one
+        DATABASE_USER: postgres
+        DATABASE_PASSWORD: 12345
+        DATABASE_HOST: localhost
+        DATABASE_PORT: 5432
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
+      run: |
+        python manage.py test
