@@ -14,13 +14,13 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_DB: mydb
-          POSTGRES_USER: myuser
-          POSTGRES_PASSWORD: mypassword
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+          POSTGRES_USER: ${{ secrets.DATABASE_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U myuser -d mydb"
+          --health-cmd="pg_isready -U ${{ secrets.DATABASE_USER }} -d ${{ secrets.DATABASE_NAME }}"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -36,12 +36,25 @@ jobs:
           --health-retries=5
 
     env:
+      # Database
       DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
       DATABASE_USER: ${{ secrets.DATABASE_USER }}
       DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
       DATABASE_HOST: localhost
       DATABASE_PORT: 5432
+
+      # Django
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      DEBUG: False
+
+      # Stripe
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      STRIPE_API_VERSION: ${{ secrets.STRIPE_API_VERSION }}
+
+      # Redis
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      REDIS_DB: 0
 
     steps:
       - uses: actions/checkout@v3
@@ -58,7 +71,7 @@ jobs:
 
       - name: Run migrations
         run: |
-          python manage.py migrate
+          python manage.py migrate --noinput
 
       - name: Run tests
         run: |
