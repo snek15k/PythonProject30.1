@@ -80,7 +80,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /home/${{ secrets.SERVER_USER }}/app || mkdir -p /home/${{ secrets.SERVER_USER }}/app && cd /home/${{ secrets.SERVER_USER }}/app
+            cd /home/${{ secrets.SERVER_USER }}/app/PythonProject30.1 || mkdir -p /home/${{ secrets.SERVER_USER }}/app/PythonProject30.1 && cd /home/${{ secrets.SERVER_USER }}/app/PythonProject30.1
             # Останавливаем старые контейнеры, если они есть
             docker compose down || true
             # Подтягиваем свежий код
