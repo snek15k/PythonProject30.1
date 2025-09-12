@@ -81,7 +81,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /home/${{ secrets.SERVER_USER }}/app/PythonProject30.1 || mkdir -p /home/${{ secrets.SERVER_USER }}/app/PythonProject30.1 && cd /home/${{ secrets.SERVER_USER }}/app/PythonProject30.1
-            cat < 'ENV_EOF' > .env
+            cat << 'EOF' > .env
             SECRET_KEY=${{ secrets.SECRET_KEY }}
             DATABASE_NAME=${{ secrets.DATABASE_NAME }}
             DATABASE_USER=${{ secrets.DATABASE_USER }}
