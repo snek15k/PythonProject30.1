@@ -191,3 +191,5 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(hour=0, minute=0),  # каждый день в полночь
     },
 }
+
+STATICK_ROOT = "app/staticfiles"
