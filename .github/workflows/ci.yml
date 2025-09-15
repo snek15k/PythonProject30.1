@@ -82,30 +82,30 @@ jobs:
           script: |
             cd /home/${{ secrets.SERVER_USER }}/app/PythonProject30.1 || mkdir -p /home/${{ secrets.SERVER_USER }}/app/PythonProject30.1 && cd /home/${{ secrets.SERVER_USER }}/app/PythonProject30.1
             cat << 'EOF' > .env
-              SECRET_KEY=${{ secrets.SECRET_KEY }}
-              DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-              DATABASE_USER=${{ secrets.DATABASE_USER }}
-              DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-              DATABASE_HOST=${{ secrets.DATABASE_HOST }}
-              DATABASE_PORT=${{ secrets.DATABASE_PORT }}
-              
-              # Django
-              DEBUG=True
-              
-              # Stripe
-              STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-              STRIPE_API_VERSION=${{ secrets.STRIPE_API_VERSION }}
-              
-              # Redis
-              REDIS_HOST=${{ secrets.REDIS_HOST }}
-              REDIS_PORT=${{ secrets.REDIS_PORT }}
-              REDIS_DB=${{ secrets.REDIS_DB }}
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_USER=${{ secrets.DATABASE_USER }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+            DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+            
+            # Django
+            DEBUG=True
+            
+            # Stripe
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            STRIPE_API_VERSION=${{ secrets.STRIPE_API_VERSION }}
+            
+            # Redis
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            REDIS_DB=${{ secrets.REDIS_DB }}
 
             EOF
             
             # Останавливаем старые контейнеры, если они есть
-            docker compose down || true
+            sudo docker compose down || true
             # Подтягиваем свежий код
             git pull origin feature || git clone -b feature git@github.com:${{ github.repository }}.git .
             # Собираем и запускаем контейнеры
-            docker compose up -d --build
+            sudo docker compose up -d --build
