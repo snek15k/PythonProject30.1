@@ -192,7 +192,7 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-STATIC_ROOT = "/app/static"
+STATIC_ROOT = "/app/staticfiles"
 
 STATICFILES_DIRS = [
 BASE_DIR / "static",
