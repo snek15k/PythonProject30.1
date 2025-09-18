@@ -21,8 +21,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копируем весь проект
 COPY . .
 
-# Собираем статику
-RUN python manage.py collectstatic --noinput
-
 # Запускаем через Gunicorn
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
